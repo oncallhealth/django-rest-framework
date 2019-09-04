@@ -6,11 +6,12 @@ from __future__ import unicode_literals
 import base64
 import binascii
 
+from datetime import datetime, timedelta
 from django.contrib.auth import authenticate, get_user_model
 from django.middleware.csrf import CsrfViewMiddleware
 from django.utils.six import text_type
 from django.utils.translation import ugettext_lazy as _
-
+import pytz
 from rest_framework import HTTP_HEADER_ENCODING, exceptions
 
 
@@ -196,6 +197,9 @@ class TokenAuthentication(BaseAuthentication):
 
         if not token.user.is_active:
             raise exceptions.AuthenticationFailed(_('User inactive or deleted.'))
+
+        if token.is_token_expired():
+            raise exceptions.AuthenticationFailed(_('Token Expires.'))
 
         return (token.user, token)
 

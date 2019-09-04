@@ -3,6 +3,7 @@ from rest_framework.authtoken.models import Token
 from rest_framework.authtoken.serializers import AuthTokenSerializer
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from django.core.exceptions import ObjectDoesNotExist
 
 
 class ObtainAuthToken(APIView):
@@ -17,6 +18,9 @@ class ObtainAuthToken(APIView):
         serializer.is_valid(raise_exception=True)
         user = serializer.validated_data['user']
         token, created = Token.objects.get_or_create(user=user)
+        if token.is_token_expired() and not created:
+            token.delete()
+            token = Token.objects.create(user=user)
         return Response({'token': token.key})
 
 

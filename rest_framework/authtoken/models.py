@@ -1,10 +1,11 @@
 import binascii
 import os
-
+from datetime import datetime, timedelta
 from django.conf import settings
 from django.db import models
 from django.utils.encoding import python_2_unicode_compatible
 from django.utils.translation import ugettext_lazy as _
+import pytz
 
 
 @python_2_unicode_compatible
@@ -30,12 +31,17 @@ class Token(models.Model):
         verbose_name_plural = _("Tokens")
 
     def save(self, *args, **kwargs):
-        if not self.key:
-            self.key = self.generate_key()
+        self.key = self.generate_key()
         return super(Token, self).save(*args, **kwargs)
 
     def generate_key(self):
         return binascii.hexlify(os.urandom(20)).decode()
+
+    def is_token_expired(self):
+        utcnow_tz = datetime.utcnow().replace(tzinfo=pytz.utc)
+        return self.created < utcnow_tz - timedelta(
+            seconds=settings.SESSION_COOKIE_AGE
+        )
 
     def __str__(self):
         return self.key
