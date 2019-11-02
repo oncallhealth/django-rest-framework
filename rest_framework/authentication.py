@@ -18,10 +18,14 @@ from rest_framework import HTTP_HEADER_ENCODING, exceptions
 def get_authorization_header(request):
     """
     Return request's 'Authorization:' header, as a bytestring.
+    Also supports 'X-Authorization:'
 
     Hide some test client ickyness where the header can be unicode.
     """
     auth = request.META.get('HTTP_AUTHORIZATION', b'')
+    if auth == '':
+        auth = request.META.get('HTTP_X_AUTHORIZATION', b'')
+
     if isinstance(auth, text_type):
         # Work around django test client oddness
         auth = auth.encode(HTTP_HEADER_ENCODING)
