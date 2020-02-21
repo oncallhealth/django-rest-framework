@@ -23,7 +23,7 @@ def get_authorization_header(request):
     Hide some test client ickyness where the header can be unicode.
     """
     auth = request.META.get('HTTP_AUTHORIZATION', b'')
-    if auth == '':
+    if auth == b'':
         auth = request.META.get('HTTP_X_AUTHORIZATION', b'')
 
     if isinstance(auth, text_type):
